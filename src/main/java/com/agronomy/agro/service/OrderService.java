@@ -103,6 +103,7 @@ public class OrderService {
         return toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getBuyerOrders(Long buyerId) {
         if (buyerId == null) {
             throw new BadRequestException("Buyer ID is required");
@@ -152,6 +153,7 @@ public class OrderService {
         return toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getFarmerOrders(Long farmerId) {
         if (farmerId == null) {
             throw new BadRequestException("Farmer ID is required");
@@ -162,6 +164,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAllByOrderByIdDesc()
                 .stream()
@@ -170,6 +173,7 @@ public class OrderService {
     }
 
     /** Cursor-based pagination for all orders (admin) */
+    @Transactional(readOnly = true)
     public CursorPageResponse<OrderResponse> getAllOrdersCursor(Long cursor, int size) {
         size = Math.min(Math.max(size, 1), 100); // cap between 1 and 100
         Pageable pageable = PageRequest.of(0, size + 1);

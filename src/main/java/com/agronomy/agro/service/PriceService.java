@@ -41,6 +41,7 @@ public class PriceService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ProductHistoryRepository historyRepo;
 
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getAllActivePrices() {
         return priceEntryRepository.findByActiveTrueOrderByCreatedAtDesc()
                 .stream()
@@ -49,6 +50,7 @@ public class PriceService {
     }
 
     /** Cursor-based pagination for active prices (Live Prices page) */
+    @Transactional(readOnly = true)
     public CursorPageResponse<PriceEntryResponse> getAllActivePricesCursor(Long cursor, int size) {
         size = Math.min(Math.max(size, 1), 100); // cap between 1 and 100
         Pageable pageable = PageRequest.of(0, size + 1);
@@ -69,6 +71,7 @@ public class PriceService {
     }
 
     /** Returns ALL listings (active + inactive) — for admin dashboard */
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getAllPricesForAdmin() {
         return priceEntryRepository.findAll()
                 .stream()
@@ -77,6 +80,7 @@ public class PriceService {
     }
 
     /** Cursor-based pagination for ALL listings (admin Manage Prices page) */
+    @Transactional(readOnly = true)
     public CursorPageResponse<PriceEntryResponse> getAllPricesForAdminCursor(Long cursor, int size) {
         size = Math.min(Math.max(size, 1), 100); // cap between 1 and 100
         Pageable pageable = PageRequest.of(0, size + 1);
@@ -96,6 +100,7 @@ public class PriceService {
             .build();
     }
 
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getPricesByProduct(Long productId) {
         if (productId == null || productId <= 0) {
             throw new BadRequestException("Valid product ID is required");
@@ -110,6 +115,7 @@ public class PriceService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getPricesByDistrict(String district) {
         if (district == null || district.isBlank()) {
             throw new BadRequestException("District name is required");
@@ -120,6 +126,7 @@ public class PriceService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getPricesByFarmer(Long farmerId) {
         if (farmerId == null || farmerId <= 0) {
             throw new BadRequestException("Valid farmer ID is required");
@@ -130,6 +137,7 @@ public class PriceService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PriceEntryResponse> getPriceHistory(Long productId, int days) {
         if (productId == null || productId <= 0) {
             throw new BadRequestException("Valid product ID is required");
@@ -402,6 +410,7 @@ public class PriceService {
     }
 
     /** All price history for a farmer across all products — for the My Price History page */
+    @Transactional(readOnly = true)
     public List<PriceHistoryResponse> getAllPriceHistoryByFarmer(Long farmerId) {
         return historyRepo.findByFarmerIdOrderByCreatedAtDesc(farmerId)
             .stream()
@@ -410,6 +419,7 @@ public class PriceService {
     }
 
     /** Cursor-based pagination for farmer price history */
+    @Transactional(readOnly = true)
     public CursorPageResponse<PriceHistoryResponse> getAllPriceHistoryByFarmerCursor(Long farmerId, Long cursor, int size) {
         size = Math.min(Math.max(size, 1), 100); // cap between 1 and 100
         Pageable pageable = PageRequest.of(0, size + 1);
@@ -429,6 +439,7 @@ public class PriceService {
             .build();
     }
 
+    @Transactional(readOnly = true)
     public List<PriceHistoryResponse> getPriceHistoryByFarmerAndProduct(Long farmerId, Long productId) {
         if (!productRepository.existsById(productId)) {
             throw new ResourceNotFoundException("Product not found: " + productId);
@@ -439,6 +450,7 @@ public class PriceService {
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PriceHistoryResponse> getPriceHistoryByProduct(Long productId, int days) {
         if (!productRepository.existsById(productId)) {
             throw new ResourceNotFoundException("Product not found: " + productId);
