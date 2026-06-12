@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://YOUR-BACKEND.up.railway.app/api/:path*"
+      "destination": "https://agrotrade-api-production.up.railway.app/api/:path*"
     },
     {
       "source": "/ws/:path*",
-      "destination": "https://YOUR-BACKEND.up.railway.app/ws/:path*"
+      "destination": "https://agrotrade-api-production.up.railway.app/ws/:path*"
     },
     {
       "source": "/(.*)",
