@@ -1,0 +1,19 @@
+package com.agronomy.agro.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CursorPageResponse<T> {
+    private List<T> data;
+    private Long nextCursor;
+    private boolean hasMore;
+    private int size;
+}

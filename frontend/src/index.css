@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f6f8f6;
+  color: #1f2d1f;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Page transition ────────────────────────────────────── */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── Float animations (landing page) ────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-7px) rotate(2deg); }
+}
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.82; transform: scale(1.04); }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.float            { animation: float 4.5s ease-in-out infinite; }
+.float-slow       { animation: floatSlow 6.5s ease-in-out infinite; }
+.float-delay-1    { animation-delay: 0.8s; }
+.float-delay-2    { animation-delay: 1.8s; }
+.float-delay-3    { animation-delay: 2.8s; }
+.pulse-soft       { animation: pulseSoft 3s ease-in-out infinite; }
+
+/* ── Gradient animated button / hero ──────────────────── */
+.gradient-animated {
+  background: linear-gradient(-45deg, #34a15e, #27854a, #1f6b3b, #34a15e);
+  background-size: 300% 300%;
+  animation: gradientShift 7s ease infinite;
+}
+
+/* ── Scroll reveal ─────────────────────────────────────── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Shared component utilities ────────────────────────── */
+@layer components {
+  /* Input fields */
+  .input-field {
+    @apply block w-full px-3.5 py-2.5 border border-sage-200 rounded-xl text-sm
+           bg-white text-gray-800 placeholder-sage-400
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400
+           transition-all duration-200;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-xl text-sm font-medium text-white
+           bg-primary-600 hover:bg-primary-700 active:bg-primary-800
+           shadow-soft hover:shadow-soft-md
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost / outline button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2
+           px-5 py-2.5 rounded-xl text-sm font-medium
+           border border-sage-200 text-sage-700 bg-white
+           hover:bg-sage-50 hover:border-sage-300
+           transition-all duration-200;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-white rounded-2xl border border-sage-100 shadow-soft
+           transition-all duration-200;
+  }
+  .card-hover {
+    @apply hover:shadow-soft-md hover:-translate-y-0.5;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* ── Mobile-first responsive adjustments ───────────────── */
+@media (max-width: 640px) {
+  /* Tighten page padding on mobile */
+  .max-w-7xl, .max-w-5xl, .max-w-4xl, .max-w-3xl {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Tables: hide overflow indicator on mobile */
+  table {
+    font-size: 0.75rem;
+  }
+  table th, table td {
+    padding: 0.5rem 0.625rem;
+  }
+
+  /* Make badges smaller on mobile */
+  .badge {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem;
+  }
+
+  /* Buttons: slightly smaller padding on mobile */
+  .btn-primary, .btn-ghost {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Cards: less padding on mobile */
+  .card {
+    border-radius: 1rem;
+  }
+}

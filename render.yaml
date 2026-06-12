@@ -1,0 +1,23 @@
+# Render Blueprint — one-click deploy
+# Push this to GitHub and click "New → Blueprint" on Render dashboard
+
+services:
+  - type: web
+    name: agrotrade-api
+    runtime: docker
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        sync: false  # set manually in dashboard
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: APP_JWT_SECRET
+        generateValue: true  # Render auto-generates a random secret
+      - key: APP_CORS_ALLOWED_ORIGINS
+        sync: false  # set to your Vercel URL
+      - key: PORT
+        value: "8080"
