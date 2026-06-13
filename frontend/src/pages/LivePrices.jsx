@@ -440,7 +440,10 @@ export default function LivePrices() {
                         {price.grade}
                       </span>
                     )}
-                    {!isFarmer && <p className="text-xs text-sage-400 mt-1 truncate">{price.farmerName}</p>}
+                    {!isFarmer && <p className="text-xs text-sage-400 mt-1 truncate">
+                      {price.farmerName}
+                      {price.farmerExperience && <span className="ml-1 text-primary-500 font-medium">· {price.farmerExperience} yrs exp</span>}
+                    </p>}
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="text-xl font-bold text-primary-600">₹{price.pricePerUnit}</p>
@@ -493,7 +496,10 @@ export default function LivePrices() {
                       {price.id === cheapestId && <Star className="h-3.5 w-3.5 text-primary-500 fill-current flex-shrink-0" />}
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{price.productName}</p>
-                        {!isFarmer && <p className="text-xs text-sage-400">{price.farmerName}</p>}
+                        {!isFarmer && <p className="text-xs text-sage-400">
+                          {price.farmerName}
+                          {price.farmerExperience && <span className="ml-1 text-primary-500">· {price.farmerExperience}yr</span>}
+                        </p>}
                       </div>
                     </div>
                   </td>

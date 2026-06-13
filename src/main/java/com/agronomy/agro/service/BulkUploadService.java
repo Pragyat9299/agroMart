@@ -57,13 +57,13 @@ public class BulkUploadService {
                     String pincode = getCellString(row, 7);
 
                     // Validate required fields
-                    if (fullName.isBlank() || email.isBlank() || phone.isBlank()) {
-                        errors.add("Row " + (i + 1) + ": fullName, email, phone are required");
+                    if (fullName.isBlank() || phone.isBlank()) {
+                        errors.add("Row " + (i + 1) + ": fullName and phone are required");
                         continue;
                     }
 
-                    // Check duplicates
-                    if (userRepository.existsByEmail(email.toLowerCase().trim())) {
+                    // Check duplicate email (only if provided)
+                    if (!email.isBlank() && userRepository.existsByEmail(email.toLowerCase().trim())) {
                         errors.add("Row " + (i + 1) + ": Email already exists - " + email);
                         continue;
                     }
@@ -79,7 +79,7 @@ public class BulkUploadService {
 
                     User farmer = User.builder()
                             .fullName(fullName.trim())
-                            .email(email.toLowerCase().trim())
+                            .email(email.isBlank() ? null : email.toLowerCase().trim())
                             .password(passwordEncoder.encode("Farmer@123")) // default password
                             .phone(phone.trim())
                             .role(Role.FARMER)

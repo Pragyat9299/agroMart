@@ -42,8 +42,8 @@ export default function Navbar() {
       {user.role === 'ADMIN' && (
         <>
           {navLink('/admin',          'Orders', mobile)}
-          {navLink('/admin/prices',   'Add / Update Price', mobile)}
-          {navLink('/admin/users',    'Vendors', mobile)}
+          {navLink('/admin/prices',   'Prices', mobile)}
+          {navLink('/admin/users',    'Users', mobile)}
           {navLink('/admin/products', 'Products', mobile)}
         </>
       )}

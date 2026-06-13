@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = "email"),
         @UniqueConstraint(columnNames = "phone")
 })
 @Getter
@@ -27,7 +26,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String fullName;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(unique = true, length = 150)
     private String email;
 
     @JsonIgnore

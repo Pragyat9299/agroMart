@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     const data = res.data.data;
     sessionStorage.setItem('token', data.token);
     sessionStorage.setItem('refreshToken', data.refreshToken);
-    const userData = { fullName: data.fullName, email: data.email, role: data.role };
+    const userData = { fullName: data.fullName, email: data.email || null, role: data.role };
     sessionStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return userData;
@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
     const data = res.data.data;
     sessionStorage.setItem('token', data.token);
     sessionStorage.setItem('refreshToken', data.refreshToken);
-    const userData = { fullName: data.fullName, email: data.email, role: data.role };
+    const userData = { fullName: data.fullName, email: data.email || null, role: data.role };
     sessionStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
     return userData;

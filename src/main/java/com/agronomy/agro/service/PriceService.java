@@ -488,6 +488,7 @@ public class PriceService {
                 .farmerId(entry.getFarmer().getId())
                 .farmerName(entry.getFarmer().getFullName())
                 .farmerCity(entry.getFarmer().getCity())
+                .farmerExperience(entry.getFarmer().getYearsOfExperience())
                 .pricePerUnit(entry.getPricePerUnit())
                 .quantityAvailable(entry.getQuantityAvailable())
                 .location(entry.getLocation())

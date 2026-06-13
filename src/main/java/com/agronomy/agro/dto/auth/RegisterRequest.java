@@ -11,7 +11,6 @@ public class RegisterRequest {
     @Size(min = 2, max = 100)
     private String fullName;
 
-    @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 

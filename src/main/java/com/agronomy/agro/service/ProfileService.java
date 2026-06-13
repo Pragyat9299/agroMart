@@ -7,6 +7,7 @@ import com.agronomy.agro.entity.User;
 import com.agronomy.agro.exception.BadRequestException;
 import com.agronomy.agro.exception.ResourceNotFoundException;
 import com.agronomy.agro.repository.UserRepository;
+import com.agronomy.agro.repository.UserUpdateHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileService {
 
     private final UserRepository userRepository;
+    private final UserUpdateHistoryRepository userUpdateHistoryRepository;
     private final PasswordEncoder passwordEncoder;
 
     public ProfileResponse getProfile(Long userId) {
@@ -112,6 +114,29 @@ public class ProfileService {
                 .state(user.getState())
                 .pincode(user.getPincode())
                 .yearsOfExperience(user.getYearsOfExperience())
+                .active(user.getActive())
                 .build();
+    }
+
+    /** Toggle user active status — farmer can self-deactivate, admin can toggle anyone */
+    @Transactional
+    public void toggleAccountStatus(Long userId, boolean active) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        String oldStatus = user.getActive() ? "ACTIVE" : "INACTIVE";
+        user.setActive(active);
+        userRepository.save(user);
+
+        // Audit log — self action
+        userUpdateHistoryRepository.save(com.agronomy.agro.entity.UserUpdateHistory.builder()
+            .user(user)
+            .fieldName("ACCOUNT_STATUS")
+            .oldValue(oldStatus)
+            .newValue(active ? "ACTIVE" : "INACTIVE")
+            .updatedByEmail(user.getEmail() != null ? user.getEmail() : user.getPhone())
+            .build());
+
+        log.info("User {} account {} by self", user.getPhone(), active ? "activated" : "deactivated");
     }
 }

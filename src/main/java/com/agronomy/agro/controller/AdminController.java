@@ -39,6 +39,36 @@ public class AdminController {
 
     // ===== Admin Reset User Password =====
 
+    /** Admin toggles user active/inactive — hides all their listings from live prices when inactive */
+    @PatchMapping("/users/{id}/toggle-status")
+    public ResponseEntity<ApiResponse<String>> toggleUserStatus(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails admin) {
+        // Prevent admin from deactivating themselves
+        if (admin.getId().equals(id)) {
+            throw new BadRequestException("You cannot deactivate your own admin account");
+        }
+
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new com.agronomy.agro.exception.ResourceNotFoundException("User not found: " + id));
+
+        boolean newStatus = !user.getActive();
+        user.setActive(newStatus);
+        userRepository.save(user);
+
+        // Audit log
+        userUpdateHistoryRepository.save(UserUpdateHistory.builder()
+            .user(user)
+            .fieldName("ACCOUNT_STATUS")
+            .oldValue(newStatus ? "INACTIVE" : "ACTIVE")
+            .newValue(newStatus ? "ACTIVE" : "INACTIVE")
+            .updatedByEmail(admin.getUsername())
+            .build());
+
+        String msg = newStatus ? "User activated — listings visible again" : "User deactivated — all listings hidden from live prices";
+        return ResponseEntity.ok(ApiResponse.success(msg, newStatus ? "ACTIVE" : "INACTIVE"));
+    }
+
     /** Admin resets a user's password to a default — user must change on next login */
     @PatchMapping("/users/{id}/reset-password")
     public ResponseEntity<ApiResponse<String>> adminResetPassword(
@@ -131,7 +161,7 @@ public class AdminController {
         // ── Email change ──
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty()) {
             String newEmail = request.getEmail().toLowerCase().trim();
-            if (!newEmail.equalsIgnoreCase(user.getEmail())) {
+            if (user.getEmail() == null || !newEmail.equalsIgnoreCase(user.getEmail())) {
                 if (userRepository.existsByEmail(newEmail)) {
                     throw new DuplicateResourceException("Email already in use: " + newEmail);
                 }
@@ -212,16 +242,23 @@ public class AdminController {
 
     @PostMapping("/farmers")
     public ResponseEntity<ApiResponse<ProfileResponse>> createFarmer(@Valid @RequestBody CreateFarmerRequest request) {
-        if (userRepository.existsByEmail(request.getEmail().toLowerCase().trim())) {
-            throw new DuplicateResourceException("Email already registered: " + request.getEmail());
+        // Check email duplicate only if provided
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            if (userRepository.existsByEmail(request.getEmail().toLowerCase().trim())) {
+                throw new DuplicateResourceException("Email already registered: " + request.getEmail());
+            }
         }
         if (userRepository.existsByPhone(request.getPhone().trim())) {
             throw new DuplicateResourceException("Phone already registered: " + request.getPhone());
         }
 
+        String email = (request.getEmail() != null && !request.getEmail().isBlank())
+            ? request.getEmail().toLowerCase().trim()
+            : null;
+
         User farmer = User.builder()
                 .fullName(request.getFullName().trim())
-                .email(request.getEmail().toLowerCase().trim())
+                .email(email)
                 .password(passwordEncoder.encode("Farmer@123")) // default password
                 .phone(request.getPhone().trim())
                 .role(Role.FARMER)

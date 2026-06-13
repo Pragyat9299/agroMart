@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Table(name = "price_entries", indexes = {
         @Index(name = "idx_price_product", columnList = "product_id"),
         @Index(name = "idx_price_farmer", columnList = "farmer_id"),
-        @Index(name = "idx_price_timestamp", columnList = "createdAt")
+        @Index(name = "idx_price_timestamp", columnList = "createdAt"),
+        @Index(name = "idx_price_active_id", columnList = "active, id")
 })
 @Getter
 @Setter

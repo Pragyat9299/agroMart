@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { getUsers, updateUser, adminResetPassword, downloadFarmerTemplate } from '../../api/admin';
+import { getUsers, updateUser, adminResetPassword, toggleUserStatus, downloadFarmerTemplate } from '../../api/admin';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import { Plus, Upload, Edit2, X, User } from 'lucide-react';
+import { STATES, BIHAR_DISTRICTS } from '../../data/locations';
 
 /* ── Edit user modal ────────────────────────────────── */
 function EditUserModal({ user, onClose, onSaved }) {
@@ -145,7 +146,7 @@ export default function ManageUsers() {
   const [showForm, setShowForm]       = useState(false);
   const [editUser, setEditUser]       = useState(null);
   const [form, setForm]               = useState({
-    fullName: '', email: '', phone: '', city: '', district: '', state: '', pincode: '', address: '',
+    fullName: '', email: '', phone: '', city: '', district: '', state: 'Bihar', pincode: '', address: '',
     yearsOfExperience: '',
   });
   const [saving, setSaving]           = useState(false);
@@ -158,7 +159,10 @@ export default function ManageUsers() {
     setLoading(true);
     try {
       const res = await getUsers(filter);
-      setUsers(res.data.data || []);
+      const data = res.data.data || [];
+      // Sort by ID desc — newest users first
+      data.sort((a, b) => b.id - a.id);
+      setUsers(data);
     } catch {
       toast.error('Failed to load users');
     } finally {
@@ -173,7 +177,7 @@ export default function ManageUsers() {
       const res = await API.post('/admin/farmers', form);
       toast.success(res.data.message);
       setShowForm(false);
-      setForm({ fullName: '', email: '', phone: '', city: '', district: '', state: '', pincode: '', address: '', yearsOfExperience: '' });
+      setForm({ fullName: '', email: '', phone: '', city: '', district: '', state: 'Bihar', pincode: '', address: '', yearsOfExperience: '' });
       fetchUsers();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create farmer');
@@ -206,7 +210,7 @@ export default function ManageUsers() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Vendors & Buyers</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Users</h1>
           <p className="text-sage-500 text-sm mt-0.5">Manage farmers and buyers on the platform</p>
         </div>
         {filter === 'FARMER' && (
@@ -269,21 +273,79 @@ export default function ManageUsers() {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { ph: 'Full Name',         key: 'fullName',  req: true,  type: 'text'  },
-              { ph: 'Email',             key: 'email',     req: true,  type: 'email' },
-              { ph: 'Phone (10 digits)', key: 'phone',     req: true,  type: 'text'  },
-              { ph: 'District',          key: 'district',  req: false, type: 'text'  },
-              { ph: 'City',              key: 'city',      req: false, type: 'text'  },
-              { ph: 'State',             key: 'state',     req: false, type: 'text'  },
-              { ph: 'Pincode',           key: 'pincode',   req: false, type: 'text'  },
-              { ph: 'Address',           key: 'address',   req: false, type: 'text'  },
-              { ph: 'Years of Experience', key: 'yearsOfExperience', req: false, type: 'number' },
-            ].map(({ ph, key, req, type }) => (
-              <input key={key} required={req} type={type} placeholder={ph}
-                value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
+            {/* Name */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Full Name <span className="text-red-500">*</span></label>
+              <input required type="text" placeholder="Full Name"
+                value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })}
                 className="input-field" />
-            ))}
+            </div>
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Email (optional)</label>
+              <input type="email" placeholder="Email"
+                value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                className="input-field" />
+            </div>
+            {/* Phone */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Phone <span className="text-red-500">*</span></label>
+              <input required type="text" placeholder="10 digit phone"
+                value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                className="input-field" />
+            </div>
+            {/* State dropdown */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">State</label>
+              <select value={form.state} onChange={e => setForm({ ...form, state: e.target.value, district: '' })} className="input-field">
+                <option value="">Select State</option>
+                {STATES.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            {/* District dropdown */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">District</label>
+              {form.state === 'Bihar' ? (
+                <select value={form.district} onChange={e => setForm({ ...form, district: e.target.value })} className="input-field">
+                  <option value="">Select District</option>
+                  {BIHAR_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              ) : (
+                <input type="text" placeholder="Enter district"
+                  value={form.district} onChange={e => setForm({ ...form, district: e.target.value })}
+                  className="input-field" />
+              )}
+            </div>
+            {/* City */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">City / Village</label>
+              <input type="text" placeholder="City or Village"
+                value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}
+                className="input-field" />
+            </div>
+            {/* Pincode */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Pincode</label>
+              <input type="text" placeholder="Pincode"
+                value={form.pincode} onChange={e => setForm({ ...form, pincode: e.target.value })}
+                className="input-field" />
+            </div>
+            {/* Address */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Address</label>
+              <input type="text" placeholder="Address"
+                value={form.address} onChange={e => setForm({ ...form, address: e.target.value })}
+                className="input-field" />
+            </div>
+            {/* Years of Experience */}
+            <div>
+              <label className="block text-xs font-medium text-sage-600 mb-1">Experience (yrs)</label>
+              <input type="number" placeholder="Years"
+                value={form.yearsOfExperience} onChange={e => setForm({ ...form, yearsOfExperience: e.target.value })}
+                className="input-field" />
+            </div>
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={saving} className="btn-primary">
@@ -361,13 +423,32 @@ export default function ManageUsers() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => setEditUser(u)}
-                      className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
-                      title="Edit user"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setEditUser(u)}
+                        className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                        title="Edit user"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await toggleUserStatus(u.id);
+                            toast.success(u.active ? 'User deactivated' : 'User activated');
+                            fetchUsers();
+                          } catch { toast.error('Failed to toggle status'); }
+                        }}
+                        className={`px-2 py-1 text-xs rounded-lg border font-medium transition-all duration-200 ${
+                          u.active
+                            ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                            : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'
+                        }`}
+                        title={u.active ? 'Deactivate user' : 'Activate user'}
+                      >
+                        {u.active ? 'Disable' : 'Enable'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

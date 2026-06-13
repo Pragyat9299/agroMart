@@ -18,4 +18,5 @@ public class ProfileResponse {
     private String state;
     private String pincode;
     private Integer yearsOfExperience;
+    private Boolean active;
 }

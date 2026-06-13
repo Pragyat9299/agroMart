@@ -96,10 +96,22 @@ public class OtpService {
 
     @Transactional
     public void resetPassword(String phone, String otp, String newPassword) {
-        // Verify OTP
-        verifyOtp(phone, otp);
+        // Verify OTP one-time check (not calling verifyOtp to avoid double-counting attempts)
+        checkVerifyRateLimit(phone);
 
-        // Validate password strength (min 8 chars + uppercase + lowercase + digit)
+        OtpToken token = otpRepo.findTopByPhoneAndUsedFalseOrderByCreatedAtDesc(phone)
+            .orElseThrow(() -> new BadRequestException("No OTP found for this phone. Request a new one."));
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("OTP has expired. Please request a new one.");
+        }
+
+        if (!token.getOtp().equals(otp)) {
+            verifyAttempts.computeIfAbsent(phone, k -> new AtomicInteger(0)).incrementAndGet();
+            throw new BadRequestException("Invalid OTP.");
+        }
+
+        // Validate password strength
         if (newPassword.length() < 8) {
             throw new BadRequestException("Password must be at least 8 characters");
         }
@@ -121,13 +133,13 @@ public class OtpService {
         userRepository.saveAndFlush(user);
 
         // Mark OTP as used
-        OtpToken token = otpRepo.findTopByPhoneAndUsedFalseOrderByCreatedAtDesc(phone).orElse(null);
-        if (token != null) {
-            token.setUsed(true);
-            otpRepo.saveAndFlush(token);
-        }
+        token.setUsed(true);
+        otpRepo.saveAndFlush(token);
 
-        log.info("Password reset successful for user: {} (phone: {})", user.getEmail(), phone);
+        // Reset attempts
+        verifyAttempts.remove(phone);
+
+        log.info("Password reset successful for phone: {}", phone);
     }
 
     private void checkVerifyRateLimit(String phone) {

@@ -9,6 +9,7 @@ export const updateOrderStatus = (id, status) => API.patch(`/admin/orders/${id}/
 export const getUsers          = (role)       => API.get(`/admin/users${role ? `?role=${role}` : ''}`);
 export const updateUser        = (id, data)   => API.put(`/admin/users/${id}`, data);
 export const adminResetPassword = (id)        => API.patch(`/admin/users/${id}/reset-password`);
+export const toggleUserStatus   = (id)        => API.patch(`/admin/users/${id}/toggle-status`);
 export const toggleAdminPrice  = (id)         => API.patch(`/admin/prices/${id}/toggle`);
 export const updateAdminPrice  = (id, data)   => API.put(`/admin/prices/${id}`, data);
 export const getAllAdminPrices = (cursor, size = 20) =>

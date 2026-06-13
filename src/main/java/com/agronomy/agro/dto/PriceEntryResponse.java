@@ -15,6 +15,7 @@ public class PriceEntryResponse {
     private Long farmerId;
     private String farmerName;
     private String farmerCity;
+    private Integer farmerExperience;
     private BigDecimal pricePerUnit;
     private BigDecimal quantityAvailable;
     private String location;

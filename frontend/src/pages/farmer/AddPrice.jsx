@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { getAllProducts } from '../../api/products';
 import { addPrice } from '../../api/farmer';
 import toast from 'react-hot-toast';
+import { BIHAR_DISTRICTS } from '../../data/locations';
 import { TrendingUp, MapPin, Package, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function AddPrice() {
@@ -192,10 +193,12 @@ export default function AddPrice() {
             </div>
             <div>
               <label className="block text-sm font-medium text-sage-700 mb-1">District</label>
-              <input type="text" value={form.district}
+              <select value={form.district}
                 onChange={e => setForm({ ...form, district: e.target.value })}
-                placeholder="e.g. Darbhanga"
-                className="input-field" />
+                className="input-field">
+                <option value="">Select District</option>
+                {BIHAR_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
           </div>
         </div>

@@ -3,11 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Leaf } from 'lucide-react';
+import { STATES, BIHAR_DISTRICTS } from '../data/locations';
 
 export default function Register() {
   const [form, setForm] = useState({
     fullName: '', email: '', password: '', phone: '',
-    role: 'BUYER', city: '', district: '', state: '', address: '', pincode: '',
+    role: 'BUYER', city: '', district: '', state: 'Bihar', address: '', pincode: '',
     yearsOfExperience: '',
   });
   const [loading, setLoading] = useState(false);
@@ -62,43 +63,54 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-soft-md border border-sage-100 p-8 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-sage-700 mb-1">Full Name</label>
+              <label className="block text-sm font-medium text-sage-700 mb-1">Full Name <span className="text-red-500">*</span></label>
               <input type="text" name="fullName" required value={form.fullName} onChange={handleChange}
                 className="input-field" placeholder="Rahul Kumar" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">Email</label>
-              <input type="email" name="email" required value={form.email} onChange={handleChange}
+              <label className="block text-sm font-medium text-sage-700 mb-1">Email <span className="text-sage-400 font-normal">(optional)</span></label>
+              <input type="email" name="email" value={form.email} onChange={handleChange}
                 className="input-field" placeholder="you@example.com" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-sage-700 mb-1">Phone <span className="text-red-500">*</span></label>
               <input type="tel" name="phone" required value={form.phone} onChange={handleChange}
                 placeholder="9876543210" className="input-field" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-sage-700 mb-1">Password <span className="text-red-500">*</span></label>
               <input type="password" name="password" required value={form.password} onChange={handleChange}
                 placeholder="Min 8 chars, 1 upper, 1 digit" className="input-field" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">I am a</label>
+              <label className="block text-sm font-medium text-sage-700 mb-1">I am a <span className="text-red-500">*</span></label>
               <select name="role" value={form.role} onChange={handleChange} className="input-field">
                 <option value="BUYER">Buyer</option>
                 <option value="FARMER">Farmer / Vendor</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">City</label>
-              <input type="text" name="city" value={form.city} onChange={handleChange} className="input-field" />
+              <label className="block text-sm font-medium text-sage-700 mb-1">State</label>
+              <select name="state" value={form.state} onChange={handleChange} className="input-field">
+                <option value="">Select State</option>
+                {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-sage-700 mb-1">District</label>
-              <input type="text" name="district" value={form.district} onChange={handleChange} className="input-field" />
+              {form.state === 'Bihar' ? (
+                <select name="district" value={form.district} onChange={handleChange} className="input-field">
+                  <option value="">Select District</option>
+                  {BIHAR_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              ) : (
+                <input type="text" name="district" value={form.district} onChange={handleChange}
+                  placeholder="Enter district" className="input-field" />
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-sage-700 mb-1">State</label>
-              <input type="text" name="state" value={form.state} onChange={handleChange} className="input-field" />
+              <label className="block text-sm font-medium text-sage-700 mb-1">City / Village</label>
+              <input type="text" name="city" value={form.city} onChange={handleChange} className="input-field" />
             </div>
             <div>
               <label className="block text-sm font-medium text-sage-700 mb-1">Pincode</label>

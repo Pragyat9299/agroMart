@@ -141,7 +141,7 @@ export default function ManageProducts() {
             <input placeholder="Category (e.g. Makhana)" value={form.category}
               onChange={e => setForm({ ...form, category: e.target.value })}
               className="input-field" />
-            <input placeholder="Grade (e.g. A, B, Premium)" value={form.grade}
+            <input placeholder="Size (e.g. Small, Medium, Large)" value={form.grade}
               onChange={e => setForm({ ...form, grade: e.target.value })}
               className="input-field" />
             <input required placeholder="Unit (kg, quintal)" value={form.unit}
@@ -165,7 +165,7 @@ export default function ManageProducts() {
         <table className="min-w-full divide-y divide-sage-100">
           <thead className="bg-sage-50">
             <tr>
-              {['Name', 'Category', 'Grade', 'Unit', 'Description', ''].map(h => (
+              {['ID', 'Name', 'Category', 'Size', 'Unit', 'Description', ''].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-sage-500 uppercase tracking-wider">
                   {h}
                 </th>
@@ -175,6 +175,7 @@ export default function ManageProducts() {
           <tbody className="divide-y divide-sage-50">
             {products.map(p => (
               <tr key={p.id} className="hover:bg-sage-50 transition-colors duration-150">
+                <td className="px-4 py-3 text-sm text-sage-500 font-medium">#{p.id}</td>
                 <td className="px-4 py-3 text-sm font-semibold text-gray-900">{p.name}</td>
                 <td className="px-4 py-3 text-sm text-sage-600">{p.category || '—'}</td>
                 <td className="px-4 py-3 text-sm text-sage-600">{p.grade || '—'}</td>

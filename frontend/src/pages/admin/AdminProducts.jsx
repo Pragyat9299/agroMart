@@ -113,6 +113,7 @@ export default function AdminProducts() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Grade</th>
@@ -123,6 +124,7 @@ export default function AdminProducts() {
           <tbody className="divide-y divide-gray-200">
             {products.map((p) => (
               <tr key={p.id}>
+                <td className="px-6 py-4 text-sm text-sage-500 font-medium">#{p.id}</td>
                 <td className="px-6 py-4 text-sm font-medium text-gray-900">{p.name}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">{p.category}</td>
                 <td className="px-6 py-4 text-sm text-gray-600">{p.grade || '-'}</td>

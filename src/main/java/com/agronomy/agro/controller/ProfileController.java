@@ -37,4 +37,20 @@ public class ProfileController {
         profileService.changePassword(user.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Password changed successfully", null));
     }
+
+    /** Farmer/Buyer can deactivate their own account — hides all their listings from live prices */
+    @PatchMapping("/deactivate")
+    public ResponseEntity<ApiResponse<Void>> deactivateAccount(
+            @AuthenticationPrincipal CustomUserDetails user) {
+        profileService.toggleAccountStatus(user.getId(), false);
+        return ResponseEntity.ok(ApiResponse.success("Account deactivated. Your listings are no longer visible.", null));
+    }
+
+    /** Farmer/Buyer can reactivate their own account */
+    @PatchMapping("/activate")
+    public ResponseEntity<ApiResponse<Void>> activateAccount(
+            @AuthenticationPrincipal CustomUserDetails user) {
+        profileService.toggleAccountStatus(user.getId(), true);
+        return ResponseEntity.ok(ApiResponse.success("Account reactivated. Your listings are now visible.", null));
+    }
 }

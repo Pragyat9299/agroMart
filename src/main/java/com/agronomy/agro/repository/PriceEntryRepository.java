@@ -50,17 +50,19 @@ public interface PriceEntryRepository extends JpaRepository<PriceEntry, Long> {
 
     // ── Cursor-based pagination queries ──
 
-    /** Active prices — first page (no cursor) */
+    /** Active prices — first page (no cursor) — JOIN FETCH for performance, excludes listings from inactive farmers */
+    @Query("SELECT p FROM PriceEntry p JOIN FETCH p.product JOIN FETCH p.farmer WHERE p.active = true AND p.farmer.active = true ORDER BY p.id DESC")
     List<PriceEntry> findByActiveTrueOrderByIdDesc(Pageable pageable);
 
     /** Active prices — subsequent pages (cursor = last seen id) */
-    List<PriceEntry> findByActiveTrueAndIdLessThanOrderByIdDesc(Long id, Pageable pageable);
+    @Query("SELECT p FROM PriceEntry p JOIN FETCH p.product JOIN FETCH p.farmer WHERE p.active = true AND p.farmer.active = true AND p.id < :id ORDER BY p.id DESC")
+    List<PriceEntry> findByActiveTrueAndIdLessThanOrderByIdDesc(@Param("id") Long id, Pageable pageable);
 
     /** ALL prices for admin — first page */
-    @Query("SELECT p FROM PriceEntry p ORDER BY p.id DESC")
+    @Query("SELECT p FROM PriceEntry p JOIN FETCH p.product JOIN FETCH p.farmer ORDER BY p.id DESC")
     List<PriceEntry> findAllOrderByIdDesc(Pageable pageable);
 
     /** ALL prices for admin — subsequent pages */
-    @Query("SELECT p FROM PriceEntry p WHERE p.id < :cursor ORDER BY p.id DESC")
+    @Query("SELECT p FROM PriceEntry p JOIN FETCH p.product JOIN FETCH p.farmer WHERE p.id < :cursor ORDER BY p.id DESC")
     List<PriceEntry> findAllByIdLessThanOrderByIdDesc(@Param("cursor") Long cursor, Pageable pageable);
 }

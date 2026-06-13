@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails {
 
     public CustomUserDetails(User user) {
         this.id = user.getId();
-        this.email = user.getEmail();
+        this.email = user.getEmail() != null ? user.getEmail() : user.getPhone();
         this.password = user.getPassword();
         this.fullName = user.getFullName();
         this.active = user.getActive();
@@ -30,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return email; // email or phone — whichever is the principal
     }
 
     @Override

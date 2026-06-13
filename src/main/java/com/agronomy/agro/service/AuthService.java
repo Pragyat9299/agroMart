@@ -35,9 +35,11 @@ public class AuthService {
             throw new BadRequestException("Admin registration is not allowed via public API");
         }
 
-        // Check duplicate email
-        if (userRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
-            throw new DuplicateResourceException("Email already registered: " + request.getEmail());
+        // Check duplicate email (only if provided)
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            if (userRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
+                throw new DuplicateResourceException("Email already registered: " + request.getEmail());
+            }
         }
 
         // Check duplicate phone
@@ -48,10 +50,15 @@ public class AuthService {
         // Validate password strength
         validatePassword(request.getPassword());
 
+        // Email is optional — if not provided, use phone as identifier
+        String email = (request.getEmail() != null && !request.getEmail().isBlank())
+            ? request.getEmail().trim().toLowerCase()
+            : null;
+
         // Build and save user
         User user = User.builder()
                 .fullName(sanitize(request.getFullName()))
-                .email(request.getEmail().trim().toLowerCase())
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phone(request.getPhone().trim())
                 .role(request.getRole())
@@ -64,10 +71,12 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        log.info("New user registered: {} with role {}", user.getEmail(), user.getRole());
+        log.info("New user registered: phone={} role={}", user.getPhone(), user.getRole());
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        // For JWT, use email if available, otherwise phone
+        String jwtSubject = email != null ? email : user.getPhone();
+        String token = jwtUtil.generateToken(jwtSubject, user.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(jwtSubject);
 
         return AuthResponse.builder()
                 .token(token)
@@ -104,15 +113,18 @@ public class AuthService {
             throw new UnauthorizedException("Account is deactivated. Contact support.");
         }
 
-        // Authenticate using email (Spring Security uses email as username)
+        // For users without email, we use phone as the Spring Security principal
+        String principal = user.getEmail() != null ? user.getEmail() : user.getPhone();
+
+        // Authenticate using principal (Spring Security uses this as username)
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getEmail(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(principal, request.getPassword())
         );
 
-        log.info("User logged in: {} ({})", user.getEmail(), user.getRole());
+        log.info("User logged in: {} ({})", principal, user.getRole());
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        String token = jwtUtil.generateToken(principal, user.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(principal);
 
         return AuthResponse.builder()
                 .token(token)
@@ -137,16 +149,20 @@ public class AuthService {
             throw new UnauthorizedException("Invalid token type — access tokens cannot be used for refresh");
         }
 
-        String email = jwtUtil.extractEmail(refreshToken);
-        User user = userRepository.findByEmail(email)
+        String subject = jwtUtil.extractEmail(refreshToken);
+
+        // Subject could be email or phone — try both
+        User user = userRepository.findByEmail(subject)
+                .or(() -> userRepository.findByPhone(subject))
                 .orElseThrow(() -> new UnauthorizedException("User not found for this token"));
 
         if (!user.getActive()) {
             throw new UnauthorizedException("Account is deactivated");
         }
 
-        String newToken = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        String principal = user.getEmail() != null ? user.getEmail() : user.getPhone();
+        String newToken = jwtUtil.generateToken(principal, user.getRole().name());
+        String newRefreshToken = jwtUtil.generateRefreshToken(principal);
 
         return AuthResponse.builder()
                 .token(newToken)

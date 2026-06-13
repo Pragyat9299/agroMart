@@ -3,6 +3,7 @@ import { getAllProducts } from '../../api/products';
 import { getAllAdminPrices, getUsers, updateAdminPrice, toggleAdminPrice, downloadPriceTemplate } from '../../api/admin';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
+import { BIHAR_DISTRICTS } from '../../data/locations';
 import { Upload, Edit2, X, Search, TrendingUp, Plus, Eye, EyeOff } from 'lucide-react';
 
 /* ── Edit listing modal ──────────────────────────── */
@@ -102,9 +103,12 @@ function EditModal({ listing, onClose, onSaved }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-sage-700 mb-1">District</label>
-              <input type="text" value={form.district}
+              <select value={form.district}
                 onChange={e => setForm({ ...form, district: e.target.value })}
-                className="input-field" placeholder="e.g. Darbhanga" />
+                className="input-field">
+                <option value="">Select District</option>
+                {BIHAR_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
           </div>
 
@@ -355,8 +359,11 @@ export default function ManagePrices() {
             </div>
             <div>
               <label className="block text-xs font-medium text-sage-600 mb-1">District</label>
-              <input placeholder="e.g. Darbhanga" value={newForm.district}
-                onChange={e => setNewForm({ ...newForm, district: e.target.value })} className="input-field" />
+              <select value={newForm.district}
+                onChange={e => setNewForm({ ...newForm, district: e.target.value })} className="input-field">
+                <option value="">Select District</option>
+                {BIHAR_DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
             </div>
           </div>
           <div className="flex gap-3">
